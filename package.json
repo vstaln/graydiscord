@@ -9,6 +9,7 @@
     "start": "tsx src/index.ts",
     "build": "tsc",
     "test": "node --import tsx --test tests/*.test.ts",
+    "setup": "tsx src/setup.ts",
     "start:dist": "node dist/index.js"
   },
   "dependencies": {
