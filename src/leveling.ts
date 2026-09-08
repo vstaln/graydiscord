@@ -19,16 +19,15 @@ function save() {
   try { writeFileSync(file, JSON.stringify(cache)); } catch {}
 }
 
-// Prestige ladder: 0 (newcomer) -> 5 -> 4 -> 3 -> 2 -> 1 (top).
-// Thresholds: 5=500, 4=4000, 3=30000, 2=200000, 1=1000000.
-// Lifetime-achievable: ~20 XP/msg + voice trickle; 1M ≈ 40k msgs + voice.
-export const THRESHOLDS = [
-  { rank: 1, xp: 1_000_000 },
-  { rank: 2, xp: 200_000 },
-  { rank: 3, xp: 30_000 },
-  { rank: 4, xp: 4_000 },
-  { rank: 5, xp: 500 },
-] as const;
+// Threshold equation: f(x) = 10·x·10^(6−x) for rank x in 1..5.
+// 5→500, 4→4000, 3→30000, 2→200000, 1→1000000.
+// At x=0 it collapses to 0=0 — there is no rank above 1, only NONE.
+export function threshold(rank: number): number | null {
+  if (!Number.isInteger(rank) || rank < 1 || rank > 5) return null;
+  return 10 * rank * 10 ** (6 - rank);
+}
+
+const THRESHOLDS = [1, 2, 3, 4, 5].map(r => ({ rank: r, xp: threshold(r)! }));
 
 // ponytail: hard cap stops int/JSON corruption from wrapping XP back to 0 and wiping rank
 export const MAX_XP = 2_000_000;
@@ -126,19 +125,13 @@ export function getUser(guildId: string, userId: string) {
   return { xp: clampXp(cur.xp), level: levelOf(cur.xp) };
 }
 
-// Ladder is exponential (~6.7x per rank: 500→4k→30k→200k→1M, tapered at top to
-// keep rank 1 lifetime-achievable). Extrapolated next would be ~6.7M —
-// unreachable under MAX_XP, i.e. NONE. Returns null at/above rank 1.
-export const NEXT_THEORETICAL = 6_687_403;
-
 export function nextThreshold(xp: unknown): number | null {
   const v = clampXp(xp);
-  if (v >= 1_000_000) return null; // NONE — no rank above 1
-  if (v >= 200_000) return 1_000_000;
-  if (v >= 30_000) return 200_000;
-  if (v >= 4_000) return 30_000;
-  if (v >= 500) return 4_000;
-  return 500;
+  for (const t of [5, 4, 3, 2, 1]) {
+    const th = threshold(t)!;
+    if (v < th) return th;
+  }
+  return null; // at/above rank 1: NONE
 }
 
 export function leaderboard(guildId: string, n = 10) {
