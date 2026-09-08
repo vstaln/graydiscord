@@ -1,11 +1,13 @@
 # deps
 node_modules/
 dist/
+build/
+coverage/
+.npm/
 
-# env
-.env
-.env.local
-.env.*.local
+# env — everything except the example (covers .env.production, .env.staging, ...)
+.env*
+!.env.example
 
 # data (local sqlite/json persists, keep .gitkeep)
 data/*.json
@@ -15,6 +17,7 @@ data/*.sqlite*
 # logs
 *.log
 logs/
+nohup.out
 
 # os / editor
 .DS_Store
