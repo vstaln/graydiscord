@@ -4,7 +4,7 @@ import { addMessageXp, addVoiceXp, getUser, leaderboard } from './leveling.js';
 import { initStarboard } from './starboard.js';
 import { moderationCommands, handleModeration } from './moderation.js';
 import { initStreams } from './streams.js';
-import { startGithubWebhook } from './github.js';
+import { startGithubWebhook, startGithubPolling } from './github.js';
 
 const client = new Client({
   intents: [
@@ -73,6 +73,7 @@ async function main() {
     } catch (e) { console.error('[bot] command register failed', e); }
     initStreams(client);
     startGithubWebhook(client);
+    startGithubPolling(client);
   });
   if (!config.token) { console.error('Set DISCORD_TOKEN in .env'); process.exit(1); }
   await client.login(config.token);

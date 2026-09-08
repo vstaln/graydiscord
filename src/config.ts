@@ -19,6 +19,8 @@ export const config = {
   port: Number(process.env.PORT ?? 3000),
   githubSecret: process.env.GITHUB_WEBHOOK_SECRET ?? '',
   githubChannelId: process.env.GITHUB_ALERT_CHANNEL_ID ?? '',
+  githubUser: process.env.GITHUB_USER ?? '',
+  githubPollSec: Number(process.env.GITHUB_POLL_SEC ?? 300),
 };
 
 if (!config.token) console.warn('[config] DISCORD_TOKEN missing — bot will not login');

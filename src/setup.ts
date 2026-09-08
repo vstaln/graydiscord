@@ -80,12 +80,13 @@ async function main() {
     }
   }
 
-  // rules embed (post once, refresh on later runs)
+  // rules embed (fresh post every run — no edit tag)
   const rules = guild.channels.cache.find(c => c.id === ids['rules']) as TextChannel;
   const recent = await rules.messages.fetch({ limit: 10 }).catch(() => null);
-  const existing = recent?.find(m => m.author.id === client.user?.id && m.embeds.some(e => e.title === 'Server rules'));
-  if (existing) { await existing.edit({ embeds: [RULES] }); console.log('[setup] updated rules embed'); }
-  else { await rules.send({ embeds: [RULES] }); console.log('[setup] posted rules embed'); }
+  const stale = [...(recent?.values() ?? [])].filter(m => m.author.id === client.user?.id && m.embeds.some(e => e.title === 'Server rules'));
+  for (const m of stale) await m.delete().catch(() => null);
+  await rules.send({ embeds: [RULES] });
+  console.log('[setup] posted rules embed');
 
   // order: INFO, COMMUNITY, LIVE on top; channels in listed order within each
   for (const [i, name] of Object.keys(LAYOUT).entries()) {
