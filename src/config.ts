@@ -10,6 +10,7 @@ export const config = {
   xpMax: Number(process.env.XP_PER_MESSAGE_MAX ?? 25),
   xpCooldownSec: Number(process.env.XP_COOLDOWN_SEC ?? 120),
   twitchChannel: process.env.TWITCH_CHANNEL ?? '',
+  xHandle: process.env.X_HANDLE ?? 'vstalingrady',
   twitchClientId: process.env.TWITCH_CLIENT_ID ?? '',
   twitchClientSecret: process.env.TWITCH_CLIENT_SECRET ?? '',
   youtubeChannelId: process.env.YOUTUBE_CHANNEL_ID ?? '',

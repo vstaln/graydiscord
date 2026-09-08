@@ -2,6 +2,32 @@ import type { Client, TextChannel } from 'discord.js';
 import { EmbedBuilder } from 'discord.js';
 import { config } from './config.js';
 
+// Simulcast: same stream on Twitch + YouTube + X. Whichever fires first,
+// one white alert links all three. Cooldown stops re-pings for the same stream.
+const ALERT_COOLDOWN = 6 * 3600_000;
+let lastAlert = 0;
+
+export function liveLinks() {
+  return {
+    twitch: `https://twitch.tv/${config.twitchChannel || 'vstaln'}`,
+    youtube: 'https://www.youtube.com/@vstalingrady/live',
+    x: `https://x.com/${config.xHandle || 'vstalingrady'}`,
+  };
+}
+
+export function buildLiveEmbed(title?: string): EmbedBuilder {
+  const l = liveLinks();
+  return new EmbedBuilder().setColor(0xffffff)
+    .setTitle('🔴 vstaln is LIVE')
+    .setDescription(`${title ?? 'Same stream everywhere:'}\n🟣 [Twitch](${l.twitch})\n🔴 [YouTube](${l.youtube})\n⬛ [X](${l.x})`);
+}
+
+async function announceLive(ch: TextChannel, title?: string) {
+  if (Date.now() - lastAlert < ALERT_COOLDOWN) return;
+  lastAlert = Date.now();
+  await ch.send({ embeds: [buildLiveEmbed(title)] });
+}
+
 // ponytail: RSS/polling first (no keys), upgrade to EventSub/webhooks if you outgrow polling
 let twitchLive = false;
 let ytLastId = '';
@@ -38,11 +64,11 @@ export function initStreams(client: Client) {
       const tw = await twitchIsLive();
       if (tw && tw.live && !twitchLive) {
         twitchLive = true;
-        await text.send({ embeds: [new EmbedBuilder().setColor(0x9146ff).setTitle(`🟣 LIVE on Twitch`).setDescription(`${tw.title ?? config.twitchChannel}\nhttps://twitch.tv/${config.twitchChannel}`)] });
+        await announceLive(text, tw.title);
       } else if (tw && !tw.live) twitchLive = false;
       const yt = await ytLatest();
       if (yt && ytLastId && yt.id !== ytLastId) {
-        await text.send({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('🔴 New YouTube upload').setDescription(`${yt.title}\nhttps://youtu.be/${yt.id}`)] });
+        await announceLive(text, yt.title);
       }
       if (yt) ytLastId = yt.id;
     } catch (e) { console.error('[streams]', e); }
