@@ -9,7 +9,7 @@ export const config = {
   levelUpChannelId: process.env.LEVEL_UP_CHANNEL_ID ?? '',
   xpMin: Number(process.env.XP_PER_MESSAGE_MIN ?? 15),
   xpMax: Number(process.env.XP_PER_MESSAGE_MAX ?? 25),
-  xpCooldownSec: Number(process.env.XP_COOLDOWN_SEC ?? 60),
+  xpCooldownSec: Number(process.env.XP_COOLDOWN_SEC ?? 120),
   twitchChannel: process.env.TWITCH_CHANNEL ?? '',
   twitchClientId: process.env.TWITCH_CLIENT_ID ?? '',
   twitchClientSecret: process.env.TWITCH_CLIENT_SECRET ?? '',

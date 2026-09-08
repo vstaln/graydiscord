@@ -92,8 +92,8 @@ export function addMessageXp(guildId: string, userId: string, content: string, c
   if (h && h === cur.lastHash && now - cur.lastHashAt < 5 * 60_000) {
     return { granted: false, leveledUp: false, xp: cur.xp, level: lvl }; // same msg spam
   }
-  // length-scaled, capped: 5 base + 1 per 20 chars, max 25
-  const amount = Math.min(25, 5 + Math.floor(text.length / 20));
+  // tatsu algo: flat 10-20 random per window (not length-scaled), one award per cooldown
+  const amount = 10 + Math.floor(Math.random() * 11);
   cur.lastXp = now;
   cur.lastHash = h;
   cur.lastHashAt = now;
@@ -124,6 +124,21 @@ export function addXp(guildId: string, userId: string, amount: number, cooldownM
 export function getUser(guildId: string, userId: string) {
   const cur = cache[guildId]?.[userId] ?? blank();
   return { xp: clampXp(cur.xp), level: levelOf(cur.xp) };
+}
+
+// Ladder is exponential (~6.7x per rank: 500→4k→30k→200k→1M, tapered at top to
+// keep rank 1 lifetime-achievable). Extrapolated next would be ~6.7M —
+// unreachable under MAX_XP, i.e. NONE. Returns null at/above rank 1.
+export const NEXT_THEORETICAL = 6_687_403;
+
+export function nextThreshold(xp: unknown): number | null {
+  const v = clampXp(xp);
+  if (v >= 1_000_000) return null; // NONE — no rank above 1
+  if (v >= 200_000) return 1_000_000;
+  if (v >= 30_000) return 200_000;
+  if (v >= 4_000) return 30_000;
+  if (v >= 500) return 4_000;
+  return 500;
 }
 
 export function leaderboard(guildId: string, n = 10) {
