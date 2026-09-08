@@ -19,7 +19,7 @@ export const config = {
   port: Number(process.env.PORT ?? 3000),
   githubSecret: process.env.GITHUB_WEBHOOK_SECRET ?? '',
   githubChannelId: process.env.GITHUB_ALERT_CHANNEL_ID ?? '',
-  githubUser: process.env.GITHUB_USER ?? '',
+  githubRepo: process.env.GITHUB_REPO ?? 'vstaln/gray',
   githubPollSec: Number(process.env.GITHUB_POLL_SEC ?? 300),
 };
 

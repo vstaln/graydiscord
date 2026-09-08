@@ -34,10 +34,10 @@ function eventEmbed(e: any): EmbedBuilder | null {
 
 // Polls a user's public GitHub events — no public URL or webhook needed, works from home.
 export function startGithubPolling(client: Client) {
-  if (!config.githubUser || !config.githubChannelId) { console.log('[github] polling skipped (GITHUB_USER/CHANNEL unset)'); return; }
+  if (!config.githubRepo || !config.githubChannelId) { console.log('[github] polling skipped (GITHUB_REPO/CHANNEL unset)'); return; }
   const tick = async () => {
     try {
-      const res = await fetch(`https://api.github.com/users/${config.githubUser}/events/public?per_page=20`, {
+      const res = await fetch(`https://api.github.com/repos/${config.githubRepo}/events?per_page=20`, {
         headers: { 'User-Agent': 'graydiscord', Accept: 'application/vnd.github+json' },
       });
       if (!res.ok) { console.error('[github] poll', res.status); return; }
