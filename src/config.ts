@@ -6,7 +6,6 @@ export const config = {
   guildId: process.env.GUILD_ID ?? '',
   starboardChannelId: process.env.STARBOARD_CHANNEL_ID ?? '',
   starboardThreshold: Number(process.env.STARBOARD_THRESHOLD ?? 3),
-  levelUpChannelId: process.env.LEVEL_UP_CHANNEL_ID ?? '',
   xpMin: Number(process.env.XP_PER_MESSAGE_MIN ?? 15),
   xpMax: Number(process.env.XP_PER_MESSAGE_MAX ?? 25),
   xpCooldownSec: Number(process.env.XP_COOLDOWN_SEC ?? 120),

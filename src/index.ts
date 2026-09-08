@@ -22,11 +22,7 @@ client.on(Events.MessageCreate, async (msg) => {
   if (!msg.guild || msg.author.bot) return;
   const r = addMessageXp(msg.guild.id, msg.author.id, msg.content, config.xpCooldownSec * 1000);
   if (r.granted && r.leveledUp) {
-    const targetId = config.levelUpChannelId || msg.channelId;
-    const ch = await msg.guild.channels.fetch(targetId).catch(() => null);
-    if (ch?.isTextBased() && ch.isSendable()) {
-      await ch.send(`🎉 <@${msg.author.id}> ranked up to **${r.level}** (${r.xp} XP)`);
-    }
+    await msg.channel.send(`🎉 <@${msg.author.id}> ranked up to **${r.level}** (${r.xp} XP)`).catch(() => null);
   }
 });
 
@@ -39,10 +35,7 @@ setInterval(async () => {
         for (const [, m] of ch.members) {
           if (m.user.bot || m.voice.mute || m.voice.deaf || m.voice.selfMute) continue;
           const r = addVoiceXp(guild.id, m.id, 5);
-          if (r.leveledUp && config.levelUpChannelId) {
-            const c = await guild.channels.fetch(config.levelUpChannelId).catch(() => null);
-            if (c?.isTextBased() && c.isSendable()) await c.send(`🔊 <@${m.id}> ranked up to **${r.level}** (voice)`);
-          }
+          if (r.leveledUp) await m.send(`🔊 You ranked up to **${r.level}** (${r.xp} XP, voice)`).catch(() => null);
         }
       }
     }
