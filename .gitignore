@@ -1,0 +1,28 @@
+# deps
+node_modules/
+dist/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# data (local sqlite/json persists, keep .gitkeep)
+data/*.json
+data/*.sqlite*
+!data/.gitkeep
+
+# logs
+*.log
+logs/
+
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# ts / build caches
+*.tsbuildinfo
+.turbo/
