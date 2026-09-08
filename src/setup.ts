@@ -34,14 +34,8 @@ const COLOR_ROLES: { name: string; color: number }[] = [
 
 const RULES = new EmbedBuilder()
   .setTitle('Server rules')
-  .setColor(0x5865f2)
-  .setDescription([
-    '1. Be kind — no harassment, hate, or spam.',
-    '2. Keep it on-topic — dev talk, streams, and progress.',
-    '3. No NSFW or pirated content.',
-    '4. Rank up by chatting (5→1) — quality > quantity, spam earns nothing.',
-    '5. Mods have final say. Questions? Open a ticket by pinging a mod.',
-  ].join('\n'));
+  .setColor(0xffffff)
+  .setDescription("just don't be a dick. that's all that matters.");
 
 async function main() {
   if (!config.token || !config.guildId) {
@@ -86,11 +80,24 @@ async function main() {
     }
   }
 
-  // rules embed (once)
+  // rules embed (post once, refresh on later runs)
   const rules = guild.channels.cache.find(c => c.id === ids['rules']) as TextChannel;
   const recent = await rules.messages.fetch({ limit: 10 }).catch(() => null);
-  const hasRules = recent?.some(m => m.author.id === client.user?.id && m.embeds.some(e => e.title === 'Server rules'));
-  if (!hasRules) { await rules.send({ embeds: [RULES] }); console.log('[setup] posted rules embed'); }
+  const existing = recent?.find(m => m.author.id === client.user?.id && m.embeds.some(e => e.title === 'Server rules'));
+  if (existing) { await existing.edit({ embeds: [RULES] }); console.log('[setup] updated rules embed'); }
+  else { await rules.send({ embeds: [RULES] }); console.log('[setup] posted rules embed'); }
+
+  // order: INFO, COMMUNITY, LIVE on top; channels in listed order within each
+  for (const [i, name] of Object.keys(LAYOUT).entries()) {
+    if (cats[name].position !== i) await cats[name].setPosition(i).catch(() => null);
+  }
+  for (const names of Object.values(LAYOUT)) {
+    for (const [i, name] of names.entries()) {
+      const ch = guild.channels.cache.get(ids[name]) as TextChannel | undefined;
+      if (ch && ch.position !== i) await ch.setPosition(i).catch(() => null);
+    }
+  }
+  console.log('[setup] order fixed');
 
   // roles (idempotent)
   for (const r of [...RANK_ROLES, ...COLOR_ROLES]) {
